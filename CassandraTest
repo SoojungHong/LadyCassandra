@@ -1,0 +1,29 @@
+import com.datastax.driver.core.*;
+
+/**
+ * Created by shong on 3/15/17.
+ */
+public class CassandraTest {
+    public static void main(String[] args){
+        //First we need to create cluster and session instance fields to hold the references.
+        //A session will manage the connections to our cluster.
+        Cluster cluster;
+        Session session;
+
+        // Connect to the cluster and keyspace "demo"
+        cluster = Cluster.builder().addContactPoint("127.0.0.1").withPort(9042).build();
+        session = cluster.connect("demo");
+
+        // Insert one record into the users table
+        session.execute("INSERT INTO users (lastname, age, city, email, firstname) VALUES ('Jones', 35, 'Austin', 'bob@example.com', 'Bob')");
+
+        // Use select to get the user we just entered
+        ResultSet results = session.execute("SELECT * FROM users WHERE lastname='Jones'");
+        for (Row row : results) {
+            System.out.format("%s %d\n", row.getString("firstname"), row.getInt("age"));
+        }
+
+        // Clean up the connection by closing it
+        cluster.close();
+    }
+}
